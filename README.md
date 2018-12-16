@@ -3,7 +3,17 @@ not even slightly production ready code. I just wanted to get some sleep, after 
 https://github.com/Tinder/StateMachine and getting some inspiration from 
 https://kotlinlang.org/docs/reference/type-safe-builders.html I thought I might make a more DSL-like state machine implementation.
 
-State machine gets constructed from a DSL like this:
+State machine gets constructed from a DSL like this. First create an enum class of all the possible states and events
+that can occur to those states:
+
+    enum class States {
+        Solid, Liquid, Gas
+    }
+    enum class Events {
+        Melt, Freeze, Boil, Condense
+    }
+
+Now create a state machine which will hold those states and receive events
 
     val machine = stateMachine<States, Events> {
         state(Solid) {
@@ -28,8 +38,10 @@ State machine gets constructed from a DSL like this:
         }
     }
 
-    // Set the initial state for the state machine with an invocation:
+Set the initial state for the state machine with an invocation:
+
     machine(Solid)
 
-    // Send the machine events, to trigger the actions listed in the transitions.
+Send the machine events, to trigger the actions listed in the transitions.
+
     machine.fireEvent(Melt)
