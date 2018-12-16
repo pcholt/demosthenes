@@ -4,33 +4,50 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+enum class States {
+    Solid, Liquid, Gas
+}
+enum class Events {
+    Melt, Freeze, Boil, Condense
+}
+
 class MainKtTest {
+
+    var melted = false
 
     @Test
     fun `can we create a new state machine`() {
+
         val machine = stateMachine<States, Events> {
-            state(solid) {
-                event(Events.melt) {
-                    transition(States.liquid)
+            state(Solid) {
+                event(Events.Melt) {
+                    transition(States.Liquid) {
+                        melted = true
+                    }
                 }
             }
-            state(States.liquid) {
-                event(freeze) {
-                    transition(solid)
+            state(States.Liquid) {
+                event(Freeze) {
+                    transition(Solid)
                 }
-                event(boil) {
-                    transition(gas)
+                event(Boil) {
+                    transition(Gas)
                 }
             }
-            state(gas) {
-                event(condense) {
-                    transition(liquid)
+            state(Gas) {
+                event(Condense) {
+                    transition(Liquid)
                 }
             }
         }
-        machine(solid)
-        machine.fireEvent(melt)
-        assertEquals(liquid, machine.currentState)
+
+        machine(Solid)
+        machine.fireEvent(Melt)
+
+        print(machine)
+
+        assertEquals(Liquid, machine.currentState)
+        assertTrue(melted)
 
     }
 }

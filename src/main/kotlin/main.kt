@@ -1,60 +1,52 @@
-import Events.*
-import States.*
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.MultiHashtable
+inline fun <S : Any, E: Any> stateMachine(init: StateMachine<S,E>.() -> Unit) = StateMachine<S, E>().apply{ init() }
 
-var temperature = 5;
-
-enum class States {
-    solid, liquid, gas
-}
-enum class Events {
-    melt, freeze, boil, condense
-}
-fun <S> transition(v: S, init: (Transition<S>.(S) -> Unit)? = null) = Transition(to= v, sideEffect = init )
-
-inline fun <S, E> stateMachine(init: StateMachine<S,E>.() -> Unit) = StateMachine<S, E>().apply{ init() }
-
-class Transition<S>(val to: S, val sideEffect : (Transition<S>.(S) -> Unit)? ) {
-
-    fun afterEnter(function: () -> Unit): Transition<S> {
-        return this
-    }
-
-    fun beforeEnter(function: () -> Unit): Transition<S> {
-        return this
-    }
-
-    fun afterExit(function: () -> Unit): Transition<S> {
-        return this
-    }
-
-    fun beforeExit(function: () -> Unit): Transition<S> {
-        sideEffect?.invoke(this, to)
-        return this
-    }
-}
-
-class StateMachine<S, E> {
+class StateMachine<S : Any, E : Any> {
     var currentState: S? = null
-    var states = MultiHashtable<S,State<S,E>>() // ? did I get that right? It's too late
+    var states = hashSetOf<Pair<S,State<S,E>>>()
 
-    fun state(state: S, init: State<S,E>.() -> Unit) = State<S,E>().also(init)
-
-    fun event(event: E, action: State<S,E>.() -> Unit) {
-
-    }
+    fun state(state: S, init: State<S,E>.() -> Unit)
+            = State<S,E>().also(init).also {
+                states.add(Pair(state, it))
+            }
 
     operator fun invoke(newState: S) {
         currentState = newState
     }
 
     fun fireEvent(event: E) {
+        // find ever
 
     }
+
+    override fun toString() = states.toString()
 }
 
-class State<T : Any?, E: Any?> {
-    var first = false
-    fun enter(x: () -> Unit) {}
-    fun exit(x: () -> Unit) {}
+class State<S : Any, E : Any> {
+    var events = hashSetOf<Pair<E,Event<S,E>>>()
+
+    fun event(event: E, init: Event<S,E>.() -> Unit)
+            = Event<S,E>(event).also(init).also {
+                events.add(Pair(event, it))
+            }
+
+    override fun toString() = events.toString()
+
 }
+
+class Event<S: Any, E: Any>(val event: E) {
+    var transition: Transition<S>? = null
+    fun transition(v: S, init: (Transition<S>.(S) -> Unit)? = null)
+            = Transition(to= v, sideEffect = init ).also { transition1 ->
+        this@Event.transition = transition1
+    }
+
+    override fun toString() =
+            transition?.toString() ?: "**"
+}
+
+class Transition<S>(val to: S, val sideEffect : (Transition<S>.(S) -> Unit)? ) {
+    override fun toString() =
+            sideEffect.toString()
+
+}
+
