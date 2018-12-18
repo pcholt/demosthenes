@@ -38,6 +38,26 @@ Now create a state machine which will hold those states and receive events
         }
     }
 
+Not sure that's the best option. I'm leaning towards this format of DSL:
+
+    val machine = stateMachine<States, Events> {
+        state(Solid) {
+            beforeTransitionFrom(States.Liquid) {
+                
+            }
+            transition(Events.Melt, States.Liquid) {
+                melted = true
+            }
+        }
+        state(States.Liquid) {
+            transition(Freeze, Solid)
+            transition(Boil, Gas)
+        }
+        state(Gas) {
+            transition(Condense, Liquid)
+        }
+    }
+
 Set the initial state for the state machine with an invocation:
 
     machine(Solid)
