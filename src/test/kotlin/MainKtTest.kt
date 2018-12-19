@@ -1,7 +1,6 @@
 import States.*
 import Events.*
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 enum class States {
@@ -10,6 +9,7 @@ enum class States {
 enum class Events {
     Melt, Freeze, Boil, Condense, Move
 }
+
 
 class MainKtTest {
 
@@ -21,29 +21,32 @@ class MainKtTest {
 
         val machine = stateMachine<States, Events> {
             state(Solid) {
-                event(Events.Melt, States.Liquid) {
+                event(Melt, Liquid) {
                     melted = true
                 }
             }
             state(States.Liquid) {
-                event(Freeze, Solid)
-                event(Boil, Gas)
+                event(Freeze, Solid) {}
+                event(Boil, Gas) {}
             }
             state(Gas) {
-                event(Condense, Liquid)
-                event(Move) {
+                event(Condense, Liquid) {}
+                event(Move, Gas) {
                     wind = true
                 }
             }
         }
 
         val machineInstance = machine.build(Solid)
-        machineInstance.fireEvent(Melt)
+        assertFalse("not melted", melted)
+        assertFalse("no wind", wind)
+        val finalInstance= machineInstance.fireEvent(Melt).fireEvent(Freeze).fireEvent(Melt).fireEvent(Boil)
 
-        print(machineInstance)
-
-        assertEquals(Liquid, machineInstance.currentState)
+        assertEquals(Gas, finalInstance.currentState)
         assertTrue(melted)
+        assertFalse(wind)
+
+        assertTrue(finalInstance.fireEvent(Move).run { wind })
 
     }
 }
