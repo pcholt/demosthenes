@@ -8,45 +8,41 @@ enum class States {
     Solid, Liquid, Gas
 }
 enum class Events {
-    Melt, Freeze, Boil, Condense
+    Melt, Freeze, Boil, Condense, Move
 }
 
 class MainKtTest {
 
     var melted = false
+    var wind = false
 
     @Test
     fun `can we create a new state machine`() {
 
         val machine = stateMachine<States, Events> {
             state(Solid) {
-                event(Events.Melt) {
-                    transition(States.Liquid) {
-                        melted = true
-                    }
+                event(Events.Melt, States.Liquid) {
+                    melted = true
                 }
             }
             state(States.Liquid) {
-                event(Freeze) {
-                    transition(Solid)
-                }
-                event(Boil) {
-                    transition(Gas)
-                }
+                event(Freeze, Solid)
+                event(Boil, Gas)
             }
             state(Gas) {
-                event(Condense) {
-                    transition(Liquid)
+                event(Condense, Liquid)
+                event(Move) {
+                    wind = true
                 }
             }
         }
 
-        machine(Solid)
-        machine.fireEvent(Melt)
+        val machineInstance = machine.build(Solid)
+        machineInstance.fireEvent(Melt)
 
-        print(machine)
+        print(machineInstance)
 
-        assertEquals(Liquid, machine.currentState)
+        assertEquals(Liquid, machineInstance.currentState)
         assertTrue(melted)
 
     }

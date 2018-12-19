@@ -1,39 +1,45 @@
 inline fun <S : Any, E: Any> stateMachine(init: StateMachine<S,E>.() -> Unit) = StateMachine<S, E>().apply{ init() }
 
 class StateMachine<S : Any, E : Any> {
-    var currentState: S? = null
-    var states = hashSetOf<Pair<S,State<S,E>>>()
+    var states = hashMapOf<S,State<S,E>>()
 
     fun state(state: S, init: State<S,E>.() -> Unit)
             = State<S,E>().also(init).also {
-                states.add(Pair(state, it))
+                states[state] = it
             }
 
-    operator fun invoke(newState: S) {
-        currentState = newState
-    }
-
-    fun fireEvent(event: E) {
-        // find ever
-
-    }
+    fun build(newState: S)
+        = StateMachineInstance(newState, this)
 
     override fun toString() = states.toString()
 }
 
-class State<S : Any, E : Any> {
-    var events = hashSetOf<Pair<E,Event<S,E>>>()
+class StateMachineInstance<S:Any, E:Any>(var currentState: S? = null, val machine:StateMachine<S,E>) {
+    fun fireEvent(event: E) {
+        val state = machine.states[currentState]
+        state?.events?.get(event)?.let {
+            currentState = it.transition?.to
+        }
+    }
 
-    fun event(event: E, init: Event<S,E>.() -> Unit)
-            = Event<S,E>(event).also(init).also {
-                events.add(Pair(event, it))
+    override fun toString() =
+        "${super.toString()} : $machine : $currentState"
+
+}
+
+class State<S : Any, E : Any> {
+    var events = hashMapOf<E,Event<S,E>>()
+
+    fun event(event: E, state: S? = null, optionalInitialiser: (Event<S,E>.() -> Unit)? = null)
+            = Event(event, state).also { optionalInitialiser?.let { initialiser -> initialiser(it) } }.also {
+                events[event] = it
             }
 
     override fun toString() = events.toString()
 
 }
 
-class Event<S: Any, E: Any>(val event: E) {
+class Event<S: Any, E: Any>(val event: E, val state: S? = null) {
     var transition: Transition<S>? = null
     fun transition(v: S, init: (Transition<S>.(S) -> Unit)? = null)
             = Transition(to= v, sideEffect = init ).also { transition1 ->
