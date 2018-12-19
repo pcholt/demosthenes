@@ -1,7 +1,13 @@
-# demosthenes
-not even slightly production ready code. I just wanted to get some sleep, after looking at
+# Demosthenes
+
+## State machine
+
+Not production ready code. 
+
+After looking at
 https://github.com/Tinder/StateMachine and getting some inspiration from 
-https://kotlinlang.org/docs/reference/type-safe-builders.html I thought I might make a more DSL-like state machine implementation.
+https://kotlinlang.org/docs/reference/type-safe-builders.html I thought I might make a more 
+DSL-like state machine implementation.
 
 State machine gets constructed from a DSL like this. First create an enum class of all the possible states and events
 that can occur to those states:
@@ -13,55 +19,31 @@ that can occur to those states:
         Melt, Freeze, Boil, Condense
     }
 
-Now create a state machine which will hold those states and receive events
+Now create a state machine which will hold state machine rules and the events to be fired
+when states change:
 
     val machine = stateMachine<States, Events> {
         state(Solid) {
-            event(Events.Melt) {
-                transition(States.Liquid) {
-                    melted = true
-                }
-            }
-        }
-        state(States.Liquid) {
-            event(Freeze) {
-                transition(Solid)
-            }
-            event(Boil) {
-                transition(Gas)
-            }
-        }
-        state(Gas) {
-            event(Condense) {
-                transition(Liquid)
-            }
-        }
-    }
-
-Not sure that's the best option. I'm leaning towards this format of DSL:
-
-    val machine = stateMachine<States, Events> {
-        state(Solid) {
-            beforeTransitionFrom(States.Liquid) {
-                
-            }
-            transition(Events.Melt, States.Liquid) {
+            event(Melt, Liquid) {
                 melted = true
             }
         }
         state(States.Liquid) {
-            transition(Freeze, Solid)
-            transition(Boil, Gas)
+            event(Freeze, Solid)
+            event(Boil, Gas)
         }
         state(Gas) {
-            transition(Condense, Liquid)
+            event(Condense, Liquid)
+            event(Move, Gas) {
+                wind = true
+            }
         }
     }
 
-Set the initial state for the state machine with an invocation:
+Create a new state machine instance from the state machine definition:
 
-    machine(Solid)
+    val machineInstance = machine.build(Solid)
 
-Send the machine events, to trigger the actions listed in the transitions.
+All side effects are triggered when you fire an event:
 
     machine.fireEvent(Melt)
