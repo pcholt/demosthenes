@@ -40,13 +40,35 @@ class MainKtTest {
         val machineInstance = machine.build(Solid)
         assertFalse("not melted", melted)
         assertFalse("no wind", wind)
-        val finalInstance= machineInstance.fireEvent(Melt).fireEvent(Freeze).fireEvent(Melt).fireEvent(Boil)
+        machineInstance.fireEvent(Melt).fireEvent(Freeze).fireEvent(Melt).fireEvent(Boil)
 
-        assertEquals(Gas, finalInstance.currentState)
+        assertEquals(Gas, machineInstance.currentState)
         assertTrue(melted)
-        assertFalse(wind)
 
-        assertTrue(finalInstance.fireEvent(Move).run { wind })
+        assertFalse(wind)
+        assertTrue(machineInstance.fireEvent(Move).run { wind })
 
     }
+
+    @Test
+    fun `how about a state machine based on integers?`() {
+
+        val a= 2
+        val machine = stateMachine<Int, Int> {
+            state(0) {
+                event ({it < 1}, 1)
+                event (1, 2)
+            }
+            state(1) {
+                event (0, 0)
+            }
+        }.build(0)
+
+        machine.fireEvent(-2).fireEvent(-2)
+        assertEquals(1, machine.currentState )
+
+
+    }
+
+
 }

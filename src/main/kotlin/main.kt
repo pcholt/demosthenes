@@ -29,20 +29,30 @@ class StateMachine<S : Any, E : Any> {
     override fun toString() = states.toString()
 }
 
-class StateMachineInstance<S:Any, E:Any>(val currentState: S? = null, val machine:StateMachine<S,E>) {
+class StateMachineInstance<S:Any, E:Any>(var currentState: S? = null, val machine:StateMachine<S,E>) {
     private val logger by LoggerDelegate()
     fun fireEvent(event: E) : StateMachineInstance<S,E> {
-        var newState : S? = null
-        machine.states[currentState]?.events?.get(event)?.let {
-            logger.d { "Fire $it" }
-            newState = it.state
-            val effect = it.sideEffect
-            if (effect != null) {
-                effect(it.state)
+        machine.states[currentState]?.run {
+            if (events.containsKey(event)) {
+                events[event]?.let {
+                    currentState = it.state
+                    val effect = it.sideEffect
+                    if (effect != null) {
+                        effect(it.state)
+                    }
+                }
             }
-            logger.d { "Fire $it" }
+            else {
+                eventMatchers.firstOrNull { it.predicate(event) }?.let {
+                    currentState = it.state
+                    val effect = it.sideEffect
+                    if (effect != null) {
+                        effect(it.state)
+                    }
+                }
+            }
         }
-        return StateMachineInstance(newState, this.machine)
+        return this
     }
 
     override fun toString() =
@@ -52,16 +62,37 @@ class StateMachineInstance<S:Any, E:Any>(val currentState: S? = null, val machin
 
 class State<S : Any, E : Any> {
     var events = hashMapOf<E,Event<S,E>>()
+    var eventMatchers = arrayListOf<EventMatcher<S,E>>()
 
     fun event(event: E, state: S, optionalInitialiser: ((S) -> Unit)? = null)
-            = Event(event, state, optionalInitialiser).also {
+            = Event(
+        event = event,
+        state = state,
+        sideEffect = optionalInitialiser
+    ).also {
                 events[event] = it
             }
+
+    fun event(eventMatcher: (E) -> Boolean, state: S, optionalInitialiser: ((S) -> Unit)? = null) {
+        eventMatchers.add(EventMatcher(
+            predicate = eventMatcher,
+            state=state,
+            sideEffect = optionalInitialiser
+        ))
+    }
 
     override fun toString() = events.toString()
 
 }
 
-data class Event<S: Any, E: Any>(val event: E, val state: S, val sideEffect: ((S) -> Unit)? = null)
+data class EventMatcher<S:Any, E: Any>(
+    val predicate: (E)->Boolean,
+    val state: S,
+    val sideEffect: ((S) -> Unit)? = null)
+
+data class Event<S: Any, E: Any>(
+    val event: E,
+    val state: S,
+    val sideEffect: ((S) -> Unit)? = null)
 
 
