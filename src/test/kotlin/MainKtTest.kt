@@ -53,7 +53,6 @@ class MainKtTest {
     @Test
     fun `how about a state machine based on integers?`() {
 
-        val a= 2
         val machine = stateMachine<Int, Int> {
             state(0) {
                 event ({it < 1}, 1)
@@ -66,7 +65,6 @@ class MainKtTest {
 
         machine.fireEvent(-2).fireEvent(-2)
         assertEquals(1, machine.currentState )
-
 
     }
 
