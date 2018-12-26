@@ -31,27 +31,28 @@ class StateMachine<S : Any, E : Any> {
 }
 
 class StateMachineInstance<S : Any, E : Any>(var currentState: S? = null, private val machine: StateMachine<S, E>) {
-    fun fireEvent(event: E): StateMachineInstance<S, E> {
-        machine.states[currentState]?.run {
+
+    fun fireEvent(event: E) = this.also{
+        fireEventOrFalse(event)
+    }
+
+    fun fireEventOrFalse(event: E): Boolean {
+        return machine.states[currentState]?.run {
             if (events.containsKey(event)) {
                 events[event]?.let {
                     currentState = it.state
-                    val effect = it.sideEffect
-                    if (effect != null) {
-                        effect(it.state)
-                    }
+                    it.sideEffect?.invoke(it.state)
+                    return true
                 }
             } else {
                 eventMatchers.firstOrNull { it.predicate(event) }?.let {
                     currentState = it.state
-                    val effect = it.sideEffect
-                    if (effect != null) {
-                        effect(it.state)
-                    }
+                    it.sideEffect?.invoke(it.state)
+                    return true
                 }
+                return false
             }
-        }
-        return this
+        } ?: false
     }
 
     override fun toString() =
