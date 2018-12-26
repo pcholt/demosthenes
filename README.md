@@ -52,3 +52,9 @@ All side effects are triggered when you fire an event:
     ...
     machine.fireEvent(Melt)
     assertTrue(melted)
+
+If you want to know whether an event fired a change of state, use `.fireEventOrFalse` instead.
+
+    if (machine.fireEventOrFalse(Melt)) {
+        debug("Melting not possible in the current state")
+    }
