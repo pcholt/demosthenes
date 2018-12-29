@@ -58,3 +58,19 @@ If you want to know whether an event fired a change of state, use `.fireEventOrF
     if (machine.fireEventOrFalse(Melt)) {
         debug("Melting not possible in the current state")
     }
+    
+# Installation
+You can get the code using gradle pretty simply using jitpack. 
+Add this to the dependencies in `build.gradle`:
+
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+
+Then you can add the `demosthenes` code as a dependency with:
+
+    dependencies {
+        ...
+        compile 'com.github.pcholt:demosthenes:0.1'
+    }
