@@ -40,6 +40,6 @@ gradle-app.setting
 # gradle/wrapper/gradle-wrapper.properties
 
 # Idea files
-/.idea
+.idea
 /gradle/wrapper/
 /out
