@@ -75,5 +75,5 @@ Then you can add the `demosthenes` code as a dependency with:
 
     dependencies {
         ...
-        compile 'com.github.pcholt:demosthenes:0.1'
+        compile 'com.github.pcholt:demosthenes:0.1a'
     }
