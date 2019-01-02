@@ -1,3 +1,5 @@
+package com.overswell.demosthenes
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
 import kotlin.properties.ReadOnlyProperty
@@ -9,7 +11,11 @@ fun <T : Any> getClassForLogging(javaClass: Class<T>): Class<*> =
 private inline fun Logger.d(function: () -> String) = if (this.isDebugEnabled) this.debug(function()) else Unit
 
 class LoggerDelegate<in R : Any> : ReadOnlyProperty<R, Logger> {
-    override fun getValue(thisRef: R, property: KProperty<*>): Logger = getLogger(getClassForLogging(thisRef.javaClass))
+    override fun getValue(thisRef: R, property: KProperty<*>): Logger = getLogger(
+        getClassForLogging(
+            thisRef.javaClass
+        )
+    )
 }
 
 inline fun <S : Any, E : Any> stateMachine(init: StateMachine<S, E>.() -> Unit) = StateMachine<S, E>().apply { init() }

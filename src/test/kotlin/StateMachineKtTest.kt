@@ -2,6 +2,7 @@ import States.*
 import Events.*
 import org.junit.Assert.*
 import org.junit.Test
+import com.overswell.demosthenes.*
 
 enum class States {
     Solid, Liquid, Gas
@@ -11,7 +12,7 @@ enum class Events {
 }
 
 
-class MainKtTest {
+class StateMachineKtTest {
 
     var melted = false
     var wind = false
