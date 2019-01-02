@@ -41,5 +41,4 @@ gradle-app.setting
 
 # Idea files
 .idea
-/gradle/wrapper/
 /out
