@@ -25,6 +25,9 @@ pre-built implementations of `hashcode` and `equals` so they are also good candi
 
 __Second__ create a state machine which will hold state machine rules 
 and the events to be fired when states change:
+    
+    import com.overswell.demosthenes.*
+    ...
 
     val machine = stateMachine<States, Events> {
         state(Solid) {
